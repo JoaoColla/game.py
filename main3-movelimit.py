@@ -5,8 +5,8 @@ import os
 pygame.init()
 
 #Definindo o tamanho da janela
-WIDTH, HEIGHT = 800, 600
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+WIDTH, HEIGHT = 1000, 700  # Tamanho inicial da janela
+screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)  # Janela redimensionável
 pygame.display.set_caption("Coca-Collastic Game.")
 
 #definindo a cor de fundo

@@ -20,14 +20,55 @@ if os.path.exists(image_file):
 else:
     print("Imagem não encontrada!")
 
+background_file = "bg.webp"
+if os.path.exists(background_file):
+    background_orig = pygame.image.load(background_file).convert() #carregar imagem de fundo
+    background = pygame.transform.scale(background_orig, (WIDTH, HEIGHT)) #redimensionar a imagem de fundo
+else:
+    background_orig = None
+    background = None
+    print("Imagem de fundo não encontrada!")
+
 #velocidade de movimento
-SPEED = 1 #pixels por movimento
+SPEED = 2 #pixels por movimento
+JUMP_STRENGTH = 20
+GRAVITY = 0.3
+JUMPING = False
+VELOCITY_Y = 0
 
 def centralize_image():
     global img_rect, WIDTH, HEIGHT
     img_rect.center = (WIDTH // 2, HEIGHT // 2)
 
 last_width, last_height = WIDTH, HEIGHT
+
+def limit_movement():
+    global img_rect, WIDTH, HEIGHT
+    if img_rect.left < 0:
+        img_rect.left = 0
+    if img_rect.right > WIDTH:
+        img_rect.right = WIDTH
+    if img_rect.top < 0:
+        img_rect.top = 0
+    if img_rect.bottom > HEIGHT:
+        img_rect.bottom = HEIGHT
+
+def jump():
+    global VELOCITY_Y, JUMPING
+    if not JUMPING:
+        VELOCITY_Y = -JUMP_STRENGTH
+        JUMPING = True
+
+def update_jump():
+    global VELOCITY_Y, JUMPING, img_rect
+    if JUMPING:
+        VELOCITY_Y += GRAVITY
+        img_rect.y += VELOCITY_Y
+        
+        if img_rect.bottom >= HEIGHT:
+            img_rect.bottom = HEIGHT
+            JUMPING = False
+            VELOCITY_Y = 0
 
 #Loop prrincipal do jogo
 running = True
@@ -41,7 +82,11 @@ while running:
     if current_width != last_width or current_height != last_height:
         WIDTH, HEIGHT = current_width, current_height
         centralize_image()
+        if background_orig:
+            background = pygame.transform.scale(background_orig, (WIDTH, HEIGHT))
         last_width, last_height = current_width, current_height
+
+
 
     #pega as teclas precionadas
     keys = pygame.key.get_pressed()
@@ -56,8 +101,21 @@ while running:
     if keys[pygame.K_DOWN]:
         img_rect.y += SPEED #move para baixo
 
-    #preecher o fundo
-    screen.fill(BG_COLOR)
+    if keys[pygame.K_SPACE]:
+        jump()
+
+    limit_movement()
+
+    update_jump()
+
+    if background:
+        screen.blit(background, (0, 0))
+    else:
+        screen.fill(BG_COLOR)
+
+    if img:
+        screen.blit(img, img_rect.topleft)
+
 
     #desenhar a imagem na tela
     screen.blit(img, img_rect.topleft)
