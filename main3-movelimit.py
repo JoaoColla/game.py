@@ -29,6 +29,17 @@ def centralize_image():
 
 last_width, last_height = WIDTH, HEIGHT
 
+def limit_movement():
+    global img_rect, WIDTH, HEIGHT
+    if img_rect.left < 0:
+        img_rect.left = 0
+    if img_rect.right > WIDTH:
+        img_rect.right = WIDTH
+    if img_rect.top < 0:
+        img_rect.top = 0
+    if img_rect.bottom > HEIGHT:
+        img_rect.bottom = HEIGHT
+
 #Loop prrincipal do jogo
 running = True
 while running:
@@ -55,6 +66,8 @@ while running:
         img_rect.y -= SPEED #move para cima
     if keys[pygame.K_DOWN]:
         img_rect.y += SPEED #move para baixo
+
+    limit_movement()
 
     #preecher o fundo
     screen.fill(BG_COLOR)
