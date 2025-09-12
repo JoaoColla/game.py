@@ -1,0 +1,196 @@
+import pygame
+import os
+
+#inicializando o Pygame
+pygame.init()
+
+#Definindo o tamanho da janela
+WIDTH, HEIGHT = 1000, 700  # Tamanho inicial da janela
+screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)  # Janela redimensionável
+pygame.display.set_caption("Coca-Collastic Game.")
+
+#definindo a cor de fundo
+BG_COLOR = (30, 30, 40) #cor de fundo (tom da imagem "RGB")
+
+#carregando imagem
+image_file = "imagem-colla.png" #coloque o nome da imagem
+if os.path.exists(image_file):
+    img = pygame.image.load(image_file).convert_alpha() #carregar imagem
+    img_rect = img.get_rect(center=(WIDTH // 2, HEIGHT // 2)) #centralizar imagem
+else:
+    print("Imagem não encontrada!")
+
+target_file = "oponente.png" #coloque o nome da imagem
+if os.path.exists(target_file):
+    target_img = pygame.image.load(target_file).convert_alpha() #carregar imagem
+    target_rect = target_img.get_rect(midbottom=(WIDTH // 2 + 200, HEIGHT)) #centralizar imagem
+else:
+    print("Imagem não encontrada!")
+    target_img = Nonetarget_rect = pygame.Rect(WIDTH // 2 + 200, HEIGHT - 50, 50, 50)
+
+background_file = "bg.webp"
+if os.path.exists(background_file):
+    background_orig = pygame.image.load(background_file).convert() #carregar imagem de fundo
+    background = pygame.transform.scale(background_orig, (WIDTH, HEIGHT)) #redimensionar a imagem de fundo
+else:
+    background_orig = None
+    background = None
+    print("Imagem de fundo não encontrada!")
+
+#velocidade de movimento
+SPEED = 2 #pixels por movimento
+JUMP_STRENGTH = 20
+GRAVITY = 0.3
+JUMPING = False
+VELOCITY_Y = 0
+
+target_velocity_x = 0
+target_velocity_y = 0
+target_jumping = False
+target_gravity = GRAVITY
+
+last_width, last_height = WIDTH, HEIGHT
+
+def limit_movement(rect):
+    if rect.left < 0:
+        rect.left = 0
+    if rect.right > WIDTH:
+        rect.rigth = WIDTH
+    if rect.top < 0:
+        rect.top = 0
+    if rect.bottom > HEIGHT:
+        rect.bottom = HEIGHT
+
+def jump():
+    global VELOCITY_Y, JUMPING
+    if not JUMPING:
+        VELOCITY_Y = -JUMP_STRENGTH
+        JUMPING = True
+
+def update_jump():
+    global VELOCITY_Y, JUMPING, img_rect
+    if JUMPING:
+        VELOCITY_Y += GRAVITY
+        img_rect.y += VELOCITY_Y
+        
+        if img_rect.bottom >= HEIGHT:
+            img_rect.bottom = HEIGHT
+            JUMPING = False
+            VELOCITY_Y = 0
+
+def update_target_physics():
+    global target_velocity_x, target_velocity_y, target_jumping, target_rect, target_velocgravity
+
+    if target_jumping:
+        target_velocity_y += target_gravity
+        target_rect.x += target_velocity_x
+        target_rect.y += target_velocity_y
+
+        if target_rect.bottom >= HEIGHT:
+            target_rect.bottom = HEIGHT
+            target_jumping = False
+            target_velocity_x = 0
+            target_velocity_y = 0
+        else:
+            target_velocity_x *= 0.95
+
+
+
+#linha 107 do professor
+
+
+
+
+
+
+
+
+def centralize_image():
+    global img_rect, WIDTH, HEIGHT
+    img_rect.center = (WIDTH // 2, HEIGHT // 2)
+
+last_width, last_height = WIDTH, HEIGHT
+
+def limit_movement():
+    global img_rect, WIDTH, HEIGHT
+    if img_rect.left < 0:
+        img_rect.left = 0
+    if img_rect.right > WIDTH:
+        img_rect.right = WIDTH
+    if img_rect.top < 0:
+        img_rect.top = 0
+    if img_rect.bottom > HEIGHT:
+        img_rect.bottom = HEIGHT
+
+def jump():
+    global VELOCITY_Y, JUMPING
+    if not JUMPING:
+        VELOCITY_Y = -JUMP_STRENGTH
+        JUMPING = True
+
+def update_jump():
+    global VELOCITY_Y, JUMPING, img_rect
+    if JUMPING:
+        VELOCITY_Y += GRAVITY
+        img_rect.y += VELOCITY_Y
+        
+        if img_rect.bottom >= HEIGHT:
+            img_rect.bottom = HEIGHT
+            JUMPING = False
+            VELOCITY_Y = 0
+
+#Loop prrincipal do jogo
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    current_width, current_height = screen.get_size()
+
+    if current_width != last_width or current_height != last_height:
+        WIDTH, HEIGHT = current_width, current_height
+        centralize_image()
+        if background_orig:
+            background = pygame.transform.scale(background_orig, (WIDTH, HEIGHT))
+        last_width, last_height = current_width, current_height
+
+
+
+    #pega as teclas precionadas
+    keys = pygame.key.get_pressed()
+
+    #movimentação da imagem
+    if keys[pygame.K_LEFT]:
+        img_rect.x -= SPEED #move para a esquerda
+    if keys[pygame.K_RIGHT]: 
+        img_rect.x += SPEED #Move para a direita
+    if keys[pygame.K_UP]: 
+        img_rect.y -= SPEED #move para cima
+    if keys[pygame.K_DOWN]:
+        img_rect.y += SPEED #move para baixo
+
+    if keys[pygame.K_SPACE]:
+        jump()
+
+    limit_movement()
+
+    update_jump()
+
+    if background:
+        screen.blit(background, (0, 0))
+    else:
+        screen.fill(BG_COLOR)
+
+    if img:
+        screen.blit(img, img_rect.topleft)
+
+
+    #desenhar a imagem na tela
+    screen.blit(img, img_rect.topleft)
+
+    #atualizando a tela
+    pygame.display.flip()
+
+#Finalizar pygame
+pygame.quit()
